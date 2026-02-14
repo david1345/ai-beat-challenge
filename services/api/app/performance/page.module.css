@@ -1,0 +1,261 @@
+
+.page {
+  min-height: 100vh;
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgba(59, 130, 246, 0.18), transparent 60%),
+    radial-gradient(1200px 600px at 90% 10%, rgba(14, 165, 233, 0.14), transparent 60%),
+    linear-gradient(180deg, #0a0d14, #07090f);
+  color: #e6edf7;
+  font-family: var(--font-geist-sans);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 22px 30px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.title {
+  font-weight: 700;
+  font-size: 22px;
+}
+
+.meta {
+  color: #8b98b6;
+}
+
+.main {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.layout {
+  display: grid;
+  gap: 14px;
+}
+
+.card {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.9), rgba(8, 11, 18, 0.9));
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.card h2 {
+  margin: 0 0 12px;
+  font-size: 16px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.grid div {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.grid span {
+  color: #8b98b6;
+  font-size: 12px;
+}
+
+.grid strong {
+  font-size: 16px;
+}
+
+.gameCard {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  overflow: hidden;
+}
+
+.focusedGame {
+  border-color: rgba(59, 130, 246, 0.6);
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.2) inset;
+}
+
+.gameHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.gameTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.modeBadge {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  background: rgba(59, 130, 246, 0.15);
+  color: #9cc7ff;
+  padding: 4px 8px;
+  border-radius: 999px;
+}
+
+.statusBadge {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-radius: 999px;
+  padding: 4px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.completed {
+  color: #86efac;
+  border-color: rgba(16, 185, 129, 0.4);
+  background: rgba(16, 185, 129, 0.14);
+}
+
+.pending {
+  color: #fcd34d;
+  border-color: rgba(251, 191, 36, 0.45);
+  background: rgba(251, 191, 36, 0.15);
+}
+
+.metaGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  padding: 10px 12px;
+}
+
+.metaGrid div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 10px;
+}
+
+.metaGrid span {
+  color: #8b98b6;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.metaGrid strong {
+  font-size: 13px;
+}
+
+.table {
+  display: grid;
+  gap: 0;
+  padding: 0 12px 12px;
+}
+
+.thead,
+.trow {
+  display: grid;
+  grid-template-columns: 2fr 0.8fr 0.8fr 1.2fr;
+  gap: 10px;
+  padding: 10px;
+}
+
+.thead {
+  color: #8b98b6;
+  font-size: 11px;
+  text-transform: uppercase;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.trow {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.trow:last-child {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.roundOverview {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.roundOverview small {
+  color: #97a5c2;
+  font-size: 11px;
+}
+
+.empty {
+  color: #8b98b6;
+  padding: 8px;
+}
+
+.error {
+  color: #fda4af;
+}
+
+.state {
+  color: #8b98b6;
+}
+
+.actions {
+  margin-top: 10px;
+}
+
+.linkBtn {
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: #fff;
+  font-size: 13px;
+  display: inline-block;
+}
+
+@media (max-width: 980px) {
+  .grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .metaGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .thead,
+  .trow {
+    grid-template-columns: 1.7fr 0.9fr 0.9fr 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .main {
+    padding: 16px;
+  }
+
+  .grid,
+  .metaGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .thead,
+  .trow {
+    grid-template-columns: 1fr;
+    gap: 5px;
+  }
+}

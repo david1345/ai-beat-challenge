@@ -1,0 +1,89 @@
+.page {
+  min-height: 100vh;
+  background: #0a0d14;
+  color: #e2e8f0;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.top a {
+  color: #94a3b8;
+}
+
+.card {
+  max-width: 900px;
+  border-radius: 18px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: #0b1220;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sub {
+  color: #94a3b8;
+  margin-top: -2px;
+  margin-bottom: 10px;
+}
+
+.card label {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.card input {
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  background: #020815;
+  color: #e2e8f0;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 16px;
+}
+
+.card button {
+  width: fit-content;
+  margin-top: 12px;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: #fff;
+  border: 0;
+  border-radius: 12px;
+  padding: 12px 20px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.status {
+  color: #93c5fd;
+}
+
+.prefRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 0;
+  border-top: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.prefTitle {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.prefSub {
+  color: #94a3b8;
+  margin-top: 4px;
+}
+
+.toggleOn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid rgba(59, 130, 246, 0.6);
+  color: #bfdbfe;
+  padding: 4px 12px;
+  font-size: 12px;
+}

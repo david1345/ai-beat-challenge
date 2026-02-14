@@ -1,0 +1,15 @@
+{
+  "name": "ai-challenge",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "services/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:api": "npm --workspace services/api run dev",
+    "dev:mobile": "npm --workspace apps/mobile run start",
+    "lint:api": "npm --workspace services/api run lint",
+    "dev": "npm run dev:api"
+  }
+}
