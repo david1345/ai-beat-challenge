@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { getCurrentPrice } from '@/lib/binance';
 import { getGame, getRounds, setGameLockTime, updateRoundPrediction } from '@/lib/db/games';
 import { snapshotAIPredictions } from '@/lib/ai-predictions';
-import { getNextCandleWindow, timeframeToMs } from '@/lib/utils/scoring';
+import { getPersonalSettlementWindow, timeframeToMs } from '@/lib/utils/scoring';
 
 export async function POST(req: Request) {
   try {
@@ -74,14 +74,15 @@ export async function POST(req: Request) {
         }
 
         const startPrice = await getCurrentPrice(round.asset);
-        const { nextOpenMs, nextCloseMs } = getNextCandleWindow(lockMs, round.timeframe);
+        const { settleTargetMs, settleBucketMs, settleAtMs } = getPersonalSettlementWindow(lockMs, round.timeframe);
 
         return {
           ...pred,
           round,
           startPrice,
-          nextOpenMs,
-          nextCloseMs,
+          settleTargetMs,
+          settleBucketMs,
+          settleAtMs,
           timeframeMs: timeframeToMs(round.timeframe),
         };
       })
@@ -96,8 +97,8 @@ export async function POST(req: Request) {
 
     await setGameLockTime(game_id, lockTime);
 
-    const earliestSettle = Math.min(...pricedPreds.map((p) => p.nextCloseMs));
-    const latestSettle = Math.max(...pricedPreds.map((p) => p.nextCloseMs));
+    const earliestSettle = Math.min(...pricedPreds.map((p) => p.settleAtMs));
+    const latestSettle = Math.max(...pricedPreds.map((p) => p.settleAtMs));
 
     return NextResponse.json({
       status: 'accepted',
@@ -112,8 +113,10 @@ export async function POST(req: Request) {
         timeframe: p.round.timeframe,
         start_price: p.startPrice,
         evaluation_candle: {
-          open_at: new Date(p.nextOpenMs).toISOString(),
-          close_at: new Date(p.nextCloseMs).toISOString(),
+          open_at: new Date(lockMs).toISOString(),
+          close_at: new Date(p.settleAtMs).toISOString(),
+          target_at: new Date(p.settleTargetMs).toISOString(),
+          bucket_ms: p.settleBucketMs,
           duration_ms: p.timeframeMs,
         },
       })),

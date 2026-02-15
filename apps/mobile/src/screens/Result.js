@@ -62,7 +62,7 @@ export default function Result({ navigation, route }) {
             </>
           ) : (
             <Text style={styles.settlePending}>
-              AI picks are locked. Tap Check Result to wait for candle close settlement.
+              AI picks are locked. Tap Check Result to wait for market settlement.
             </Text>
           )}
 

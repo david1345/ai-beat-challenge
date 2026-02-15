@@ -5,9 +5,9 @@ import { storage } from "../utils/storage";
 import { api } from "../api/client";
 
 const MODES = [
-  { id: "FLASH", title: "⚡ FLASH", duration: "Play 3 min · 1m chart", reward: "Up to 200pt" },
-  { id: "SPEED", title: "💎 SPEED", duration: "Play 5 min · 3m chart", reward: "Up to 300pt" },
-  { id: "STANDARD", title: "🔥 STANDARD", duration: "Play 15 min · 5m chart", reward: "Up to 500pt" }
+  { id: "FLASH", title: "⚡ FLASH", duration: "Play 1 min · 1m chart", reward: "Up to 200pt" },
+  { id: "SPEED", title: "💎 SPEED", duration: "Play 3 min · 3m chart", reward: "Up to 300pt" },
+  { id: "STANDARD", title: "🔥 STANDARD", duration: "Play 5 min · 5m chart", reward: "Up to 500pt" }
 ];
 
 export default function ChallengeSelect({ navigation }) {
@@ -24,7 +24,16 @@ export default function ChallengeSelect({ navigation }) {
       const username = await storage.getUsername();
 
       if (!username) {
-        Alert.alert("Error", "Username not found. Please restart the app.");
+        Alert.alert("Session expired", "Please set your username again.", [
+          {
+            text: "Go to Onboarding",
+            onPress: () => {
+              const rootNav = navigation.getParent();
+              if (rootNav) rootNav.navigate("Onboarding");
+              else navigation.navigate("Onboarding");
+            },
+          },
+        ]);
         return;
       }
 
@@ -46,10 +55,8 @@ export default function ChallengeSelect({ navigation }) {
       }
     } catch (error) {
       console.error("Error starting game:", error);
-      Alert.alert(
-        "Error",
-        error.response?.data?.error || "Failed to start game. Please try again."
-      );
+      const reason = error.response?.data?.error || error.message || "Failed to start game. Please try again.";
+      Alert.alert("Error", reason);
     } finally {
       setLoading(false);
       setLoadingMode(null);

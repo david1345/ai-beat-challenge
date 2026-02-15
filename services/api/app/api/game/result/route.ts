@@ -2,14 +2,14 @@ import { NextResponse } from 'next/server';
 import { getGame, getRounds, completeRound, completeGame } from '@/lib/db/games';
 import { updateUserStats } from '@/lib/db/users';
 import { getPriceAtTime } from '@/lib/binance';
-import { determineRoundWinner, calculatePoints, getNextCandleWindow, type GameMode } from '@/lib/utils/scoring';
+import { determineRoundWinner, calculatePoints, getPersonalSettlementWindow, type GameMode } from '@/lib/utils/scoring';
 
 function parseDbTimestamp(value: string): number {
-  // Supabase timestamp columns may come without timezone; treat them as UTC.
-  if (/[zZ]$|[+\-]\d{2}:\d{2}$/.test(value)) {
-    return new Date(value).getTime();
-  }
-  return new Date(`${value}Z`).getTime();
+  // Supabase timestamp without timezone is stored as UTC in this project.
+  // Force UTC parse so client local-time rendering is correct.
+  if (!value) return Date.now();
+  const normalized = /[zZ]|[+-]\d{2}:?\d{2}$/.test(value) ? value : `${value}Z`;
+  return new Date(normalized).getTime();
 }
 
 export async function GET(req: Request) {
@@ -66,9 +66,9 @@ export async function GET(req: Request) {
         continue;
       }
 
-      const lockTimeRaw = game.completed_at || round.created_at;
+      const lockTimeRaw = round.created_at;
       const lockTimeMs = parseDbTimestamp(lockTimeRaw);
-      const { nextOpenMs, nextCloseMs } = getNextCandleWindow(lockTimeMs, round.timeframe);
+      const { settleTargetMs, settleBucketMs, settleAtMs } = getPersonalSettlementWindow(lockTimeMs, round.timeframe);
 
       if (round.end_price !== null && round.result !== null) {
         processedRounds.push({
@@ -84,8 +84,10 @@ export async function GET(req: Request) {
           ai_reasoning: round.ai_reasoning,
           result: round.result,
           evaluation_candle: {
-            open_at: new Date(nextOpenMs).toISOString(),
-            close_at: new Date(nextCloseMs).toISOString(),
+            open_at: new Date(lockTimeMs).toISOString(),
+            close_at: new Date(settleAtMs).toISOString(),
+            target_at: new Date(settleTargetMs).toISOString(),
+            bucket_ms: settleBucketMs,
           },
         });
 
@@ -95,7 +97,7 @@ export async function GET(req: Request) {
       }
 
       const now = Date.now();
-      if (now < nextCloseMs) {
+      if (now < settleAtMs) {
         allRoundsComplete = false;
         processedRounds.push({
           round_id: round.id,
@@ -109,17 +111,19 @@ export async function GET(req: Request) {
           ai_confidence: round.ai_confidence,
           ai_reasoning: round.ai_reasoning,
           result: 'pending',
-          time_remaining: Math.max(0, Math.floor((nextCloseMs - now) / 1000)),
+          time_remaining: Math.max(0, Math.floor((settleAtMs - now) / 1000)),
           evaluation_candle: {
-            open_at: new Date(nextOpenMs).toISOString(),
-            close_at: new Date(nextCloseMs).toISOString(),
+            open_at: new Date(lockTimeMs).toISOString(),
+            close_at: new Date(settleAtMs).toISOString(),
+            target_at: new Date(settleTargetMs).toISOString(),
+            bucket_ms: settleBucketMs,
           },
         });
         continue;
       }
 
       try {
-        const endPrice = await getPriceAtTime(round.asset, nextCloseMs);
+        const endPrice = await getPriceAtTime(round.asset, settleAtMs);
         const startPrice = round.start_price;
 
         const result = determineRoundWinner(
@@ -144,8 +148,10 @@ export async function GET(req: Request) {
           ai_reasoning: round.ai_reasoning,
           result,
           evaluation_candle: {
-            open_at: new Date(nextOpenMs).toISOString(),
-            close_at: new Date(nextCloseMs).toISOString(),
+            open_at: new Date(lockTimeMs).toISOString(),
+            close_at: new Date(settleAtMs).toISOString(),
+            target_at: new Date(settleTargetMs).toISOString(),
+            bucket_ms: settleBucketMs,
           },
         });
 

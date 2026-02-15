@@ -56,6 +56,7 @@ type HistoryItem = {
 
 type Totals = {
   games: number;
+  rounds?: number;
   wins: number;
   losses: number;
   draws: number;
@@ -67,7 +68,17 @@ function formatDateTime(value: string | null | undefined) {
   if (!value) return "-";
   const ms = Date.parse(value);
   if (!Number.isFinite(ms)) return "-";
-  return new Date(ms).toLocaleString();
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  return new Date(ms).toLocaleString(undefined, {
+    timeZone: tz,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  });
 }
 
 function shortenGameId(gameId: string) {
@@ -135,7 +146,8 @@ export default function PerformanceClient({
         <h2>Overview</h2>
         <div className={styles.grid}>
           <div><span>Total Points</span><strong>{profile.points}</strong></div>
-          <div><span>Total Games</span><strong>{totals?.games ?? profile.total_games}</strong></div>
+          <div><span>Total Settled Matches</span><strong>{totals?.games ?? profile.total_games}</strong></div>
+          <div><span>Total Rounds (Loaded)</span><strong>{totals?.rounds ?? (totals ? totals.wins + totals.losses + totals.draws + totals.pending : profile.total_games)}</strong></div>
           <div><span>Round Wins</span><strong>{totals?.wins ?? profile.wins}</strong></div>
           <div><span>Round Losses</span><strong>{totals?.losses ?? profile.losses}</strong></div>
           <div><span>Pending Rounds</span><strong>{totals?.pending ?? 0}</strong></div>

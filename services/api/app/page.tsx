@@ -53,17 +53,17 @@ export default function Home() {
             <div className={styles.cardHeader}>Today&apos;s Modes</div>
             <div className={styles.modeCard}>
               <div className={styles.modeTitle}>⚡ FLASH</div>
-              <div className={styles.modeMeta}>Predict in 1m · Play 3 min</div>
+              <div className={styles.modeMeta}>Predict in 1m · Play 1 min</div>
               <div className={styles.modeReward}>Reward up to 150pt</div>
             </div>
             <div className={styles.modeCard}>
               <div className={styles.modeTitle}>💎 SPEED</div>
-              <div className={styles.modeMeta}>Predict in 3m · Play 5 min</div>
+              <div className={styles.modeMeta}>Predict in 3m · Play 3 min</div>
               <div className={styles.modeReward}>Reward up to 300pt</div>
             </div>
             <div className={styles.modeCardAlt}>
               <div className={styles.modeTitle}>🔥 STANDARD</div>
-              <div className={styles.modeMeta}>Predict in 5m · Play 15 min</div>
+              <div className={styles.modeMeta}>Predict in 5m · Play 5 min</div>
               <div className={styles.modeReward}>Reward up to 500pt</div>
             </div>
           </div>
@@ -184,7 +184,6 @@ export default function Home() {
         </div>
         <div className={styles.footerWarn}>⚠ Entertainment Only · No Financial Advice · 18+ Only</div>
         <div className={styles.footerContact}>support@aibeatchallenge.gg</div>
-        <div className={styles.footerCopy}>© 2026 AI Beat Challenge · All rights reserved</div>
       </footer>
     </div>
   );

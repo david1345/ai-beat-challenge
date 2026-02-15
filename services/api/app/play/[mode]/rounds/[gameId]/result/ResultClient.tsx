@@ -110,7 +110,7 @@ export default function ResultClient({ gameId, username, mode }: { gameId: strin
       <div className={styles.points}>Points: +{data.points_earned}</div>
 
       {data.status !== "completed" ? (
-        <div className={styles.state}>Market candle still open · next settle in {formatSeconds(maxRemaining)}</div>
+        <div className={styles.state}>Settlement pending · next resolve in {formatSeconds(maxRemaining)}</div>
       ) : (
         <div className={styles.done}>Settlement complete.</div>
       )}

@@ -119,7 +119,7 @@ export default function CheckClient({ gameId, username }: { gameId: string; user
       <div className={styles.score}>You {data.user_score} : {data.ai_score} AI</div>
       <div className={styles.points}>Points: +{data.points_earned}</div>
       {data.status !== "completed" ? (
-        <div className={styles.state}>Waiting next candle close · {formatSeconds(maxRemaining)}</div>
+        <div className={styles.state}>Waiting for market settlement · {formatSeconds(maxRemaining)}</div>
       ) : (
         <div className={styles.done}>Final result settled.</div>
       )}

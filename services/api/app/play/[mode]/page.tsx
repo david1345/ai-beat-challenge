@@ -5,21 +5,21 @@ import LobbyClient from "./LobbyClient";
 const MODE_COPY: Record<string, { title: string; subtitle: string; timeframes: string; assets: string; modeValue: string }> = {
   flash: {
     title: "FLASH",
-    subtitle: "Play 3 min",
+    subtitle: "Play 1 min",
     timeframes: "1m chart",
     assets: "Random 3 assets per game",
     modeValue: "FLASH",
   },
   speed: {
     title: "SPEED",
-    subtitle: "Play 5 min",
+    subtitle: "Play 3 min",
     timeframes: "3m chart",
     assets: "Random 3 assets per game",
     modeValue: "SPEED",
   },
   standard: {
     title: "STANDARD",
-    subtitle: "Play 15 min",
+    subtitle: "Play 5 min",
     timeframes: "5m chart",
     assets: "Random 3 assets per game",
     modeValue: "STANDARD",

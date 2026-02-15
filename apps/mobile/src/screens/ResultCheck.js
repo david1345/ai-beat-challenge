@@ -123,7 +123,7 @@ export default function ResultCheck({ navigation, route }) {
           {isCompleted ? (
             <Text style={styles.done}>Final result settled.</Text>
           ) : (
-            <Text style={styles.state}>Waiting next candle close · {formatSeconds(maxRemaining)}</Text>
+            <Text style={styles.state}>Waiting for market settlement · {formatSeconds(maxRemaining)}</Text>
           )}
 
           {!!error && <Text style={styles.error}>{error}</Text>}

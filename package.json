@@ -10,6 +10,9 @@
     "dev:api": "npm --workspace services/api run dev",
     "dev:mobile": "npm --workspace apps/mobile run start",
     "lint:api": "npm --workspace services/api run lint",
-    "dev": "npm run dev:api"
+    "dev": "npm run dev:api",
+    "cf:build": "npm --prefix services/api install --workspaces=false && npm --workspace services/api run cf:build",
+    "cf:preview": "npm --prefix services/api install --workspaces=false && npm --workspace services/api run cf:preview",
+    "cf:deploy": "npm --prefix services/api install --workspaces=false && npm --workspace services/api run cf:deploy"
   }
 }

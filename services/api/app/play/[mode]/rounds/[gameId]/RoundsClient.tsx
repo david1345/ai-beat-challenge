@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { useRouter } from "next/navigation";
 import styles from "./page.module.css";
 
@@ -54,20 +55,44 @@ export default function RoundsClient({ mode, gameId }: { mode: string; gameId: s
   const [rounds, setRounds] = useState<Round[]>([]);
   const [predictions, setPredictions] = useState<Record<string, "UP" | "DOWN">>({});
   const [submitState, setSubmitState] = useState<"idle" | "submitting" | "done">("idle");
-  const [username, setUsername] = useState("web-player");
+  const [username, setUsername] = useState("guest-player");
   const [activeRoundIndex, setActiveRoundIndex] = useState(0);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+
+    const normalize = (raw?: string | null) =>
+      (raw || "").trim().toLowerCase().replace(/[^a-z0-9._-]/g, "-").slice(0, 32);
+
+    const applyUsername = (raw?: string | null) => {
+      const next = normalize(raw);
+      if (!next) return false;
+      setUsername(next);
+      window.localStorage.setItem("abc:username", next);
+      return true;
+    };
+
     const url = new URL(window.location.href);
     const qUsername = url.searchParams.get("username");
-    if (qUsername && qUsername.trim()) {
-      setUsername(qUsername.trim());
-      window.localStorage.setItem("abc:username", qUsername.trim());
-      return;
-    }
+    if (applyUsername(qUsername)) return;
+
     const saved = window.localStorage.getItem("abc:username");
-    if (saved && saved.trim()) setUsername(saved.trim());
+    if (applyUsername(saved)) return;
+
+    const syncFromSession = async () => {
+      try {
+        const supabase = getSupabaseBrowserClient();
+        const { data } = await supabase.auth.getSession();
+        const user = data?.session?.user;
+        if (user) {
+          applyUsername((user.user_metadata?.nickname as string | undefined) || user.email?.split("@")[0]);
+        }
+      } catch {
+        // noop
+      }
+    };
+
+    syncFromSession();
   }, []);
 
   useEffect(() => {

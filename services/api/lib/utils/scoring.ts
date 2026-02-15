@@ -4,21 +4,21 @@
 export const MODE_CONFIG = {
   FLASH: {
     timeframe: '1m',
-    timeInMs: 3 * 60 * 1000,
+    timeInMs: 1 * 60 * 1000,
     roundCount: 3,
     assetPool: ['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'XRPUSDT', 'ADAUSDT', 'DOGEUSDT', 'LINKUSDT'],
     basePoints: 100
   },
   SPEED: {
     timeframe: '3m',
-    timeInMs: 5 * 60 * 1000,
+    timeInMs: 3 * 60 * 1000,
     roundCount: 3,
     assetPool: ['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'XRPUSDT', 'ADAUSDT', 'DOGEUSDT', 'AVAXUSDT'],
     basePoints: 150
   },
   STANDARD: {
     timeframe: '5m',
-    timeInMs: 15 * 60 * 1000,
+    timeInMs: 5 * 60 * 1000,
     roundCount: 3,
     assetPool: ['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'XRPUSDT', 'ADAUSDT', 'DOGEUSDT', 'TRXUSDT'],
     basePoints: 250
@@ -116,16 +116,32 @@ export function timeframeToMs(timeframe: string): number {
 }
 
 /**
- * Align lock time to the NEXT candle and return next candle open/close.
- * Example: 3m timeframe, lock at 10:01:20 -> open 10:03:00, close 10:06:00.
+ * Settlement bucket size by timeframe.
+ * Small bucket keeps fair personal timers while allowing batched processing.
  */
-export function getNextCandleWindow(lockTimeMs: number, timeframe: string): { nextOpenMs: number; nextCloseMs: number } {
-  const timeframeMs = timeframeToMs(timeframe);
-  const currentBucketStart = Math.floor(lockTimeMs / timeframeMs) * timeframeMs;
-  const nextOpenMs = currentBucketStart + timeframeMs;
-  const nextCloseMs = nextOpenMs + timeframeMs;
+export function getSettlementBucketMs(timeframe: string): number {
+  const tfMs = timeframeToMs(timeframe);
 
-  return { nextOpenMs, nextCloseMs };
+  if (tfMs <= 60_000) return 2_000;   // 1m mode
+  if (tfMs <= 180_000) return 3_000;  // 3m mode
+  return 5_000;                       // 5m+ mode
+}
+
+/**
+ * Personal timer settlement window based on lock timestamp.
+ * Example: 1m timeframe, lock at 10:00:37 -> target 10:01:37,
+ * bucketed settle may be 10:01:38 (2s bucket).
+ */
+export function getPersonalSettlementWindow(
+  lockTimeMs: number,
+  timeframe: string
+): { settleTargetMs: number; settleBucketMs: number; settleAtMs: number } {
+  const timeframeMs = timeframeToMs(timeframe);
+  const settleTargetMs = lockTimeMs + timeframeMs;
+  const settleBucketMs = getSettlementBucketMs(timeframe);
+  const settleAtMs = Math.ceil(settleTargetMs / settleBucketMs) * settleBucketMs;
+
+  return { settleTargetMs, settleBucketMs, settleAtMs };
 }
 
 /**

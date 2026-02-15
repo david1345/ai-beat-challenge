@@ -18,7 +18,43 @@ export default function ProfileMenu() {
   useEffect(() => {
     const supabase = getSupabaseBrowserClient();
 
-    supabase.auth.getUser().then(({ data }) => setUser(data.user ?? null));
+    const syncUser = async () => {
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (sessionData?.session?.user) {
+        setUser(sessionData.session.user);
+        return true;
+      }
+
+      const { data } = await supabase.auth.getUser();
+      setUser(data.user ?? null);
+      return Boolean(data.user);
+    };
+
+    const syncWithRetry = async (retries = 10, delayMs = 250) => {
+      for (let i = 0; i < retries; i += 1) {
+        const ok = await syncUser();
+        if (ok) return;
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
+      }
+    };
+
+    syncWithRetry();
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("auth") === "success") {
+      syncWithRetry(20, 250).finally(() => {
+        const clean = new URL(window.location.href);
+        clean.searchParams.delete("auth");
+        window.history.replaceState({}, "", clean.toString());
+      });
+    }
+
+    const onFocus = () => {
+      syncWithRetry(4, 200);
+    };
+
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onFocus);
 
     const {
       data: { subscription }
@@ -27,7 +63,11 @@ export default function ProfileMenu() {
       router.refresh();
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onFocus);
+      subscription.unsubscribe();
+    };
   }, [router]);
 
   useEffect(() => {
@@ -50,10 +90,22 @@ export default function ProfileMenu() {
   const displayName =
     (user?.user_metadata?.nickname as string | undefined)?.trim() || user?.email?.split("@")[0] || "Guest";
 
-  const usernameForRoutes =
-    (user?.user_metadata?.nickname as string | undefined)?.trim() ||
-    user?.email?.split("@")[0] ||
-    "web-player";
+const resolvedUsername =
+    ((user?.user_metadata?.nickname as string | undefined)?.trim() || user?.email?.split("@")[0] || "guest-player")
+      .toLowerCase()
+      .replace(/[^a-z0-9._-]/g, "-")
+      .slice(0, 32) || "guest-player";
+
+  const usernameForRoutes = resolvedUsername;
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (user) {
+      window.localStorage.setItem("abc:username", resolvedUsername);
+    } else {
+      window.localStorage.removeItem("abc:username");
+    }
+  }, [user, resolvedUsername]);
 
   const signInGoogle = async () => {
     setLoading(true);
@@ -76,6 +128,7 @@ export default function ProfileMenu() {
   const signOut = async () => {
     const supabase = getSupabaseBrowserClient();
     await supabase.auth.signOut();
+    if (typeof window !== "undefined") window.localStorage.removeItem("abc:username");
     setOpen(false);
     router.refresh();
   };

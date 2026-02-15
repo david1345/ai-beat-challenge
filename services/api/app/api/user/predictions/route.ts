@@ -1,14 +1,14 @@
 import { NextResponse } from 'next/server';
 import { getUserProfile, getUserGames } from '@/lib/db/users';
 import { getRounds } from '@/lib/db/games';
-import { getNextCandleWindow } from '@/lib/utils/scoring';
+import { getPersonalSettlementWindow } from '@/lib/utils/scoring';
 
 function parseDbTimestamp(value: string): number {
-  // Supabase timestamp columns may come without timezone; treat them as UTC.
-  if (/[zZ]$|[+\-]\d{2}:\d{2}$/.test(value)) {
-    return new Date(value).getTime();
-  }
-  return new Date(`${value}Z`).getTime();
+  // Supabase timestamp without timezone is stored as UTC in this project.
+  // Force UTC parse so client local-time rendering is correct.
+  if (!value) return Date.now();
+  const normalized = /[zZ]|[+-]\d{2}:?\d{2}$/.test(value) ? value : `${value}Z`;
+  return new Date(normalized).getTime();
 }
 
 export async function GET(req: Request) {
@@ -44,13 +44,13 @@ export async function GET(req: Request) {
 
         const mappedRounds = rounds.map((round) => {
           const lockMs = parseDbTimestamp(round.created_at);
-          const { nextOpenMs, nextCloseMs } = getNextCandleWindow(lockMs, round.timeframe);
+          const { settleAtMs } = getPersonalSettlementWindow(lockMs, round.timeframe);
 
           const status = !round.user_prediction
             ? 'pending_pick'
             : round.result
               ? round.result
-              : now < nextCloseMs
+              : now < settleAtMs
                 ? 'pending'
                 : 'processing';
 
@@ -60,7 +60,7 @@ export async function GET(req: Request) {
             asset: round.asset,
             timeframe: round.timeframe,
             prediction_at: new Date(lockMs).toISOString(),
-            settle_at: new Date(nextCloseMs).toISOString(),
+            settle_at: new Date(settleAtMs).toISOString(),
             start_price: round.start_price,
             end_price: round.end_price,
             user_prediction: round.user_prediction,
@@ -69,7 +69,7 @@ export async function GET(req: Request) {
             ai_reasoning: round.ai_reasoning,
             result: round.result,
             status,
-            time_remaining: status === 'pending' ? Math.max(0, Math.floor((nextCloseMs - now) / 1000)) : 0,
+            time_remaining: status === 'pending' ? Math.max(0, Math.floor((settleAtMs - now) / 1000)) : 0,
           };
         });
 
@@ -100,12 +100,15 @@ export async function GET(req: Request) {
     );
 
     const totals = {
-      games: entries.length,
+      // settled matches from canonical user profile stats
+      games: user.wins + user.losses + user.draws,
+      // rounds/timeline stats from loaded entries (includes pending)
       wins: entries.reduce((acc, g) => acc + g.summary.wins, 0),
       losses: entries.reduce((acc, g) => acc + g.summary.losses, 0),
       draws: entries.reduce((acc, g) => acc + g.summary.draws, 0),
       pending: entries.reduce((acc, g) => acc + g.summary.pending, 0),
-      points: entries.reduce((acc, g) => acc + (g.points_earned || 0), 0),
+      points: user.points,
+      rounds: entries.reduce((acc, g) => acc + g.summary.total_rounds, 0),
     };
 
     return NextResponse.json({

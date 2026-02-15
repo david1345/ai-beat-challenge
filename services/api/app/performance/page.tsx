@@ -7,7 +7,7 @@ export default async function PerformancePage({
   searchParams: Promise<{ username?: string; focus?: string }>;
 }) {
   const params = await searchParams;
-  const username = params?.username || "web-player";
+  const username = params?.username || "guest-player";
   const focusGameId = params?.focus || "";
 
   return (

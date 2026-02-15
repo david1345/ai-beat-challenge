@@ -7,7 +7,7 @@ export default async function MyStatsPage({
   searchParams: Promise<{ username?: string }>;
 }) {
   const params = await searchParams;
-  const username = params?.username || "web-player";
+  const username = params?.username || "guest-player";
 
   return (
     <div className={styles.page}>

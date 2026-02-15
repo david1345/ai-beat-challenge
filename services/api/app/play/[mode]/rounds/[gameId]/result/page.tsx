@@ -11,14 +11,14 @@ export default async function ResultPage({
 }) {
   const { mode, gameId } = await params;
   const query = await searchParams;
-  const username = query?.username || "web-player";
+  const username = query?.username || "guest-player";
 
   return (
     <div className={styles.page}>
       <header className={styles.header}>
         <Link href={`/play/${mode}`} className={styles.back}>← Lobby</Link>
         <div className={styles.title}>Result · {mode.toUpperCase()}</div>
-        <div className={styles.meta}>Game ID: {gameId.slice(0, 8)}...</div>
+        <div className={styles.meta}>Game ID: {gameId}</div>
       </header>
       <main className={styles.main}>
         <ResultClient gameId={gameId} username={username} mode={mode} />

@@ -1,22 +1,65 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-
-const DEFAULT_USERNAME = "web-player";
+import { useEffect, useState } from "react";
+import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 import styles from "./page.module.css";
+
+const DEFAULT_USERNAME = "guest-player";
+
+function normalizeUsername(raw?: string | null) {
+  const v = (raw || "").trim().toLowerCase().replace(/[^a-z0-9._-]/g, "-").slice(0, 32);
+  return v || DEFAULT_USERNAME;
+}
 
 export default function LobbyClient({ modeSlug, modeValue }: { modeSlug: string; modeValue: string }) {
   const router = useRouter();
   const [isStarting, setIsStarting] = useState(false);
   const [error, setError] = useState("");
 
-  const getUsername = () => {
-    if (typeof window === "undefined") return DEFAULT_USERNAME;
+  useEffect(() => {
+    if (typeof window === "undefined") return;
     const saved = window.localStorage.getItem("abc:username");
-    if (saved && saved.trim()) return saved.trim();
-    window.localStorage.setItem("abc:username", DEFAULT_USERNAME);
-    return DEFAULT_USERNAME;
+    if (saved?.trim()) return;
+
+    const sync = async () => {
+      try {
+        const supabase = getSupabaseBrowserClient();
+        const { data } = await supabase.auth.getSession();
+        const user = data?.session?.user;
+        if (!user) return;
+        const next = normalizeUsername((user.user_metadata?.nickname as string | undefined) || user.email?.split("@")[0]);
+        window.localStorage.setItem("abc:username", next);
+      } catch {
+        // noop
+      }
+    };
+
+    sync();
+  }, []);
+
+  const getUsername = async () => {
+    if (typeof window === "undefined") return DEFAULT_USERNAME;
+
+    const saved = window.localStorage.getItem("abc:username");
+    if (saved && saved.trim()) return normalizeUsername(saved);
+
+    try {
+      const supabase = getSupabaseBrowserClient();
+      const { data } = await supabase.auth.getSession();
+      const user = data?.session?.user;
+      if (user) {
+        const username = normalizeUsername((user.user_metadata?.nickname as string | undefined) || user.email?.split("@")[0]);
+        window.localStorage.setItem("abc:username", username);
+        return username;
+      }
+    } catch {
+      // noop
+    }
+
+    const guest = `${DEFAULT_USERNAME}-${Math.random().toString(36).slice(2, 8)}`;
+    window.localStorage.setItem("abc:username", guest);
+    return guest;
   };
 
   const handleStartBattle = async () => {
@@ -24,7 +67,7 @@ export default function LobbyClient({ modeSlug, modeValue }: { modeSlug: string;
     setIsStarting(true);
 
     try {
-      const username = getUsername();
+      const username = await getUsername();
       const response = await fetch("/api/game/start", {
         method: "POST",
         headers: {

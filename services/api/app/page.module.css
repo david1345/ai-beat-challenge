@@ -148,7 +148,7 @@
 }
 
 .statValue {
-  font-size: 20px;
+  font-size: 15px;
   font-weight: 700;
 }
 
@@ -235,7 +235,7 @@
 }
 
 .sectionTitle {
-  font-size: 20px;
+  font-size: 15px;
   margin: 0;
 }
 
@@ -512,25 +512,21 @@
   align-items: center;
   justify-content: center;
   color: #9fb0d1;
-  font-size: 14px;
-  letter-spacing: 1px;
+  font-size: 13px;
+  letter-spacing: 1.2px;
 }
 
 .footerWarn {
   color: #fbbf24;
-  font-size: 24px;
+  font-size: 15px;
   font-weight: 700;
 }
 
 .footerContact {
   color: #94a3b8;
-  font-size: 32px;
+  font-size: 15px;
 }
 
-.footerCopy {
-  color: rgba(148, 163, 184, 0.6);
-  font-size: 24px;
-}
 
 @media (max-width: 900px) {
   .footer {
@@ -543,10 +539,7 @@
   }
 
   .footerContact {
-    font-size: 14px;
-  }
-
-  .footerCopy {
     font-size: 12px;
   }
+
 }

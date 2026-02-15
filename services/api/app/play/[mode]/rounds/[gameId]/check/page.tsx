@@ -11,7 +11,7 @@ export default async function CheckPage({
 }) {
   const { mode, gameId } = await params;
   const query = await searchParams;
-  const username = query?.username || "web-player";
+  const username = query?.username || "guest-player";
 
   return (
     <div className={styles.page}>
@@ -20,7 +20,7 @@ export default async function CheckPage({
           ← Back
         </Link>
         <div className={styles.title}>Result Check · {mode.toUpperCase()}</div>
-        <div className={styles.meta}>Game ID: {gameId.slice(0, 8)}...</div>
+        <div className={styles.meta}>Game ID: {gameId}</div>
       </header>
 
       <main className={styles.main}>

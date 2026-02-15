@@ -8,7 +8,7 @@ export default async function AchievementsPage({
   searchParams: Promise<{ username?: string }>;
 }) {
   const params = await searchParams;
-  const username = params?.username || "web-player";
+  const username = params?.username || "guest-player";
 
   return (
     <main className={styles.page}>

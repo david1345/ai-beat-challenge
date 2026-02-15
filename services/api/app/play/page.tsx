@@ -6,21 +6,21 @@ const modes = [
     key: "flash",
     title: "FLASH",
     emoji: "⚡",
-    subtitle: "Play 3 min · 1m chart",
+    subtitle: "Play 1 min · 1m chart",
     reward: "Reward up to 150pt",
   },
   {
     key: "speed",
     title: "SPEED",
     emoji: "💎",
-    subtitle: "Play 5 min · 3m chart",
+    subtitle: "Play 3 min · 3m chart",
     reward: "Reward up to 300pt",
   },
   {
     key: "standard",
     title: "STANDARD",
     emoji: "🔥",
-    subtitle: "Play 15 min · 5m chart",
+    subtitle: "Play 5 min · 5m chart",
     reward: "Reward up to 500pt",
   },
 ];
@@ -30,9 +30,7 @@ export default function Play() {
     <div className={styles.page}>
       <header className={styles.header}>
         <Link href="/" className={styles.brand}>AI Beat Challenge</Link>
-        <div className={styles.headerMeta}>
-          <Link href="/performance?username=web-player" className={styles.metaLink}>Performance</Link>
-        </div>
+        <div className={styles.headerMeta} />
       </header>
 
       <main className={styles.main}>
