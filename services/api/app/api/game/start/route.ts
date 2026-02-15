@@ -56,7 +56,7 @@ export async function POST(req: Request) {
               timeframe,
               startPrice: currentPrice,
               // placeholder, later overwritten by /api/game/predict
-              aiPrediction: 'UP',
+              aiPrediction: 'UP' as const,
               aiReasoning: null,
               aiConfidence: null
             },
