@@ -51,9 +51,20 @@ function formatSeconds(totalSeconds: number) {
 
 function formatDateTime(value?: string | null) {
   if (!value) return "-";
-  const ms = Date.parse(value);
+  const normalized = /([zZ]|[+-]\d{2}:\d{2})$/.test(value) ? value : `${value}Z`;
+  const ms = Date.parse(normalized);
   if (!Number.isFinite(ms)) return "-";
-  return new Date(ms).toLocaleString();
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  return new Date(ms).toLocaleString(undefined, {
+    timeZone: tz,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  });
 }
 
 function roundStatus(round: Round) {

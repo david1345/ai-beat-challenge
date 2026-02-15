@@ -66,7 +66,8 @@ type Totals = {
 
 function formatDateTime(value: string | null | undefined) {
   if (!value) return "-";
-  const ms = Date.parse(value);
+  const normalized = /([zZ]|[+-]\d{2}:\d{2})$/.test(value) ? value : `${value}Z`;
+  const ms = Date.parse(normalized);
   if (!Number.isFinite(ms)) return "-";
   const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
   return new Date(ms).toLocaleString(undefined, {

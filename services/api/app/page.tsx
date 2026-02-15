@@ -51,21 +51,21 @@ export default function Home() {
           </div>
           <div className={styles.heroCard}>
             <div className={styles.cardHeader}>Today&apos;s Modes</div>
-            <div className={styles.modeCard}>
+            <Link className={styles.modeCard} href="/play/flash">
               <div className={styles.modeTitle}>⚡ FLASH</div>
               <div className={styles.modeMeta}>Predict in 1m · Play 1 min</div>
               <div className={styles.modeReward}>Reward up to 150pt</div>
-            </div>
-            <div className={styles.modeCard}>
+            </Link>
+            <Link className={styles.modeCard} href="/play/speed">
               <div className={styles.modeTitle}>💎 SPEED</div>
               <div className={styles.modeMeta}>Predict in 3m · Play 3 min</div>
               <div className={styles.modeReward}>Reward up to 300pt</div>
-            </div>
-            <div className={styles.modeCardAlt}>
+            </Link>
+            <Link className={styles.modeCardAlt} href="/play/standard">
               <div className={styles.modeTitle}>🔥 STANDARD</div>
               <div className={styles.modeMeta}>Predict in 5m · Play 5 min</div>
               <div className={styles.modeReward}>Reward up to 500pt</div>
-            </div>
+            </Link>
           </div>
         </section>
 

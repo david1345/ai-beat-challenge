@@ -37,6 +37,20 @@ function formatSeconds(totalSeconds: number) {
   return `${mins}:${String(secs).padStart(2, "0")}`;
 }
 
+function formatLocalTime(value: string) {
+  const normalized = /([zZ]|[+-]\d{2}:\d{2})$/.test(value) ? value : `${value}Z`;
+  const ms = Date.parse(normalized);
+  if (!Number.isFinite(ms)) return "-";
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  return new Date(ms).toLocaleTimeString(undefined, {
+    timeZone: tz,
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  });
+}
+
 export default function ResultClient({ gameId, username, mode }: { gameId: string; username: string; mode: string }) {
   const [data, setData] = useState<ResultPayload | null>(null);
   const [error, setError] = useState("");
@@ -146,7 +160,7 @@ export default function ResultClient({ gameId, username, mode }: { gameId: strin
                   <div className={styles.overviewSub}>Start {r.start_price} · End {r.end_price ?? "pending"}</div>
                   {r.evaluation_candle ? (
                     <div className={styles.overviewSub}>
-                      Eval {new Date(r.evaluation_candle.open_at).toLocaleTimeString()} → {new Date(r.evaluation_candle.close_at).toLocaleTimeString()}
+                      Eval {formatLocalTime(r.evaluation_candle.open_at)} → {formatLocalTime(r.evaluation_candle.close_at)}
                     </div>
                   ) : null}
                   <div className={styles.overviewSub}>Result: {r.result}</div>
