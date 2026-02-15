@@ -1,6 +1,36 @@
 import axios from 'axios';
 
 const BINANCE_API_BASE = process.env.BINANCE_API_BASE_URL || 'https://api.binance.com';
+const BINANCE_API_BASE_CANDIDATES = [
+  BINANCE_API_BASE,
+  'https://api1.binance.com',
+  'https://api2.binance.com',
+  'https://api3.binance.com',
+  'https://api4.binance.com'
+];
+
+function uniqueBases(bases: string[]) {
+  return [...new Set(bases.map((b) => b.trim()).filter(Boolean))];
+}
+
+async function fetchFromAnyBase<T>(path: string, params: Record<string, string | number>) {
+  const bases = uniqueBases(BINANCE_API_BASE_CANDIDATES);
+  let lastError: unknown = null;
+
+  for (const base of bases) {
+    try {
+      const response = await axios.get<T>(`${base}${path}`, {
+        params,
+        timeout: 6000
+      });
+      return response.data;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  throw lastError ?? new Error(`Failed to fetch ${path}`);
+}
 
 export interface PriceData {
   symbol: string;
@@ -22,11 +52,8 @@ export interface KlineData {
  */
 export async function getCurrentPrice(symbol: string): Promise<number> {
   try {
-    const response = await axios.get<PriceData>(`${BINANCE_API_BASE}/api/v3/ticker/price`, {
-      params: { symbol },
-      timeout: 5000
-    });
-    return parseFloat(response.data.price);
+    const data = await fetchFromAnyBase<PriceData>('/api/v3/ticker/price', { symbol });
+    return parseFloat(data.price);
   } catch (error) {
     console.error('Error fetching current price:', error);
     throw new Error(`Failed to fetch price for ${symbol}`);
@@ -45,12 +72,9 @@ export async function getKlines(
   limit: number = 100
 ): Promise<KlineData[]> {
   try {
-    const response = await axios.get(`${BINANCE_API_BASE}/api/v3/klines`, {
-      params: { symbol, interval, limit },
-      timeout: 5000
-    });
+    const data = await fetchFromAnyBase<any[]>('/api/v3/klines', { symbol, interval, limit });
 
-    return response.data.map((k: any[]) => ({
+    return data.map((k: any[]) => ({
       openTime: k[0],
       open: k[1],
       high: k[2],
@@ -73,23 +97,20 @@ export async function getKlines(
 export async function getPriceAtTime(symbol: string, timestamp: number): Promise<number> {
   try {
     // Get klines around the target time (1 minute interval)
-    const response = await axios.get(`${BINANCE_API_BASE}/api/v3/klines`, {
-      params: {
-        symbol,
-        interval: '1m',
-        startTime: timestamp - 60000, // 1 minute before
-        endTime: timestamp + 60000,   // 1 minute after
-        limit: 3
-      },
-      timeout: 5000
+    const data = await fetchFromAnyBase<any[]>('/api/v3/klines', {
+      symbol,
+      interval: '1m',
+      startTime: timestamp - 60000, // 1 minute before
+      endTime: timestamp + 60000,   // 1 minute after
+      limit: 3
     });
 
-    if (response.data.length === 0) {
+    if (data.length === 0) {
       throw new Error('No price data found for the specified time');
     }
 
     // Find the closest kline to the target timestamp
-    const closestKline = response.data.reduce((prev: any[], curr: any[]) => {
+    const closestKline = data.reduce((prev: any[], curr: any[]) => {
       const prevDiff = Math.abs(prev[0] - timestamp);
       const currDiff = Math.abs(curr[0] - timestamp);
       return currDiff < prevDiff ? curr : prev;
