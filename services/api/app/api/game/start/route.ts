@@ -38,9 +38,11 @@ export async function POST(req: Request) {
     const timeframe = modeConfig.timeframe;
     const interval = getBinanceInterval(timeframe);
 
-    // Prepare rounds data quickly (AI runs in background after rounds render).
-    const roundBuild = await Promise.all(
-      assets.map(async (asset, index) => {
+    const buildRound = async (asset: string, roundNumber: number) => {
+      const maxAttempts = 3;
+      let lastError: unknown = null;
+
+      for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
         try {
           const [currentPrice, klines] = await Promise.all([
             getCurrentPrice(asset),
@@ -49,7 +51,7 @@ export async function POST(req: Request) {
 
           return {
             roundData: {
-              roundNumber: index + 1,
+              roundNumber,
               asset,
               timeframe,
               startPrice: currentPrice,
@@ -69,11 +71,55 @@ export async function POST(req: Request) {
             }))
           };
         } catch (error) {
-          console.error(`Error preparing round ${index + 1}:`, error);
-          throw new Error(`Failed to prepare round ${index + 1}`);
+          lastError = error;
+          if (attempt < maxAttempts) {
+            await new Promise((resolve) => setTimeout(resolve, 250 * attempt));
+          }
         }
-      })
-    );
+      }
+
+      throw lastError ?? new Error("Unknown market data error");
+    };
+
+    const fallbackPool = [...modeConfig.assetPool].filter((a) => !assets.includes(a));
+    const candidateAssets = [...assets, ...fallbackPool];
+    const roundBuild: Array<{
+      roundData: {
+        roundNumber: number;
+        asset: string;
+        timeframe: string;
+        startPrice: number;
+        aiPrediction: 'UP' | 'DOWN';
+        aiReasoning: string | null;
+        aiConfidence: number | null;
+      };
+      chartPoints: number[];
+      chartCandles: Array<{
+        t: number;
+        o: number;
+        h: number;
+        l: number;
+        c: number;
+        v: number;
+      }>;
+    }> = [];
+
+    for (const asset of candidateAssets) {
+      if (roundBuild.length >= modeConfig.roundCount) break;
+      try {
+        const built = await buildRound(asset, roundBuild.length + 1);
+        roundBuild.push(built);
+      } catch (error) {
+        console.error(`Error preparing round ${roundBuild.length + 1} with asset ${asset}:`, error);
+      }
+    }
+
+    if (roundBuild.length < modeConfig.roundCount) {
+      return NextResponse.json(
+        { error: "Market data provider is temporarily unavailable. Please retry." },
+        { status: 503 }
+      );
+    }
 
     const roundsData = roundBuild.map(r => r.roundData);
 
